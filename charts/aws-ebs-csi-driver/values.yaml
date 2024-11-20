@@ -173,9 +173,19 @@ sidecars:
         type: RuntimeDefault
       readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
+# -- Local HTTP proxy settings.
+# These are overridding the global settings below.
 proxy:
-  http_proxy:
-  no_proxy:
+  noProxy: ""
+  http: ""
+  https: ""
+cluster:
+  # -- Global HTTP proxy settings.
+  # These are getting overriden by the local settings above and provided by cluster-apps-operator.
+  proxy:
+    noProxy: ""
+    http: ""
+    https: ""
 imagePullSecrets: []
 nameOverride:
 fullnameOverride:

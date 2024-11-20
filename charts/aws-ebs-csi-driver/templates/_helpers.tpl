@@ -35,7 +35,7 @@ Create chart name and version as used by the chart label.
 Determine image
 */}}
 {{- define "aws-ebs-csi-driver.fullImagePath" -}}
-{{ printf "%s%s:%s%s" (default "" .Values.image.containerRegistry) .Values.image.repository (default (printf "v%s" .Chart.AppVersion) (.Values.image.tag | toString)) (.Values.fips | ternary "-fips" "") }}
+{{ printf "%s/%s:%s%s" (default "" .Values.global.image.registry) .Values.image.repository (default (printf "v%s" .Chart.AppVersion) (.Values.image.tag | toString)) (.Values.fips | ternary "-fips" "") }}
 {{- end -}}
 
 {{/*
@@ -51,6 +51,8 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/component: csi-driver
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
+giantswarm.io/service-type: managed
+application.giantswarm.io/team: {{ index .Chart.Annotations "application.giantswarm.io/team" | quote }}
 {{- if .Values.customLabels }}
 {{ toYaml .Values.customLabels }}
 {{- end }}
@@ -83,12 +85,19 @@ Convert the `--extra-tags` command line arg from a map.
 Handle http proxy env vars
 */}}
 {{- define "aws-ebs-csi-driver.http-proxy" -}}
+{{- $proxy := deepCopy .Values.cluster.proxy | mustMerge .Values.proxy }}
+{{- if $proxy.http }}
 - name: HTTP_PROXY
-  value: {{ .Values.proxy.http_proxy | quote }}
+  value: {{ $proxy.http | quote }}
+{{- end}}
+{{- if $proxy.https }}
 - name: HTTPS_PROXY
-  value: {{ .Values.proxy.http_proxy | quote }}
+  value: {{ $proxy.https | quote }}
+{{- end}}
+{{- if $proxy.noProxy }}
 - name: NO_PROXY
-  value: {{ .Values.proxy.no_proxy | quote }}
+  value: {{ $proxy.noProxy | quote }}
+{{- end}}
 {{- end -}}
 
 {{/*
