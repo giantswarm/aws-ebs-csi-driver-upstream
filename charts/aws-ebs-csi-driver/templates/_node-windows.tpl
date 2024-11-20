@@ -103,9 +103,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-            {{- if .Values.proxy.http_proxy }}
             {{- include "aws-ebs-csi-driver.http-proxy" . | nindent 12 }}
-            {{- end }}
             {{- with .Values.node.otelTracing }}
             - name: OTEL_SERVICE_NAME
               value: {{ .otelServiceName }}
@@ -159,7 +157,7 @@ spec:
               exec:
                 command: ["/bin/aws-ebs-csi-driver", "pre-stop-hook"]
         - name: node-driver-registrar
-          image: {{ printf "%s%s:%s" (default "" .Values.image.containerRegistry) .Values.sidecars.nodeDriverRegistrar.image.repository .Values.sidecars.nodeDriverRegistrar.image.tag }}
+          image: {{ printf "%s/%s:%s" (default "" .Values.global.image.registry) .Values.sidecars.nodeDriverRegistrar.image.repository .Values.sidecars.nodeDriverRegistrar.image.tag }}
           imagePullPolicy: {{ default .Values.image.pullPolicy .Values.sidecars.nodeDriverRegistrar.image.pullPolicy }}
           {{- if .Values.node.windowsHostProcess }}
           command:
@@ -189,9 +187,7 @@ spec:
             - name: PLUGIN_REG_DIR
               value: C:\\var\\lib\\kubelet\\plugins_registry\\
           {{- end }}
-            {{- if .Values.proxy.http_proxy }}
             {{- include "aws-ebs-csi-driver.http-proxy" . | nindent 12 }}
-            {{- end }}
             {{- with .Values.sidecars.nodeDriverRegistrar.env }}
             {{- . | toYaml | nindent 12 }}
             {{- end }}
@@ -216,7 +212,7 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
         - name: liveness-probe
-          image: {{ printf "%s%s:%s" (default "" .Values.image.containerRegistry) .Values.sidecars.livenessProbe.image.repository .Values.sidecars.livenessProbe.image.tag }}
+          image: {{ printf "%s/%s:%s" (default "" .Values.global.image.registry) .Values.sidecars.livenessProbe.image.repository .Values.sidecars.livenessProbe.image.tag }}
           imagePullPolicy: {{ default .Values.image.pullPolicy .Values.sidecars.livenessProbe.image.pullPolicy }}
           {{- if .Values.node.windowsHostProcess }}
           command:
