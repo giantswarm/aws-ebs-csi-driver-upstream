@@ -23,7 +23,6 @@ spec:
   selector:
     matchLabels:
       app: ebs-csi-controller
-      {{- include "aws-ebs-csi-driver.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
